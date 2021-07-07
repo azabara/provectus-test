@@ -12,7 +12,7 @@ provider "aws" {
 #  }
 #}
 
-resource "aws_s3_bucket" "terraform_state"
+resource "aws_s3_bucket" "terraform_state" {
     bucket = "bucket-of-tulips"
 
   lifecycle {
@@ -32,12 +32,13 @@ resource "aws_s3_bucket" "terraform_state"
   }
 }
 
-resource "aws_dynamodb_table" "terrafrom_locks"
-    name = "tf-be"
+resource "aws_dynamodb_table" "terrafrom_locks" {
+    name         = "tf-be"
     billing_mode = "PAY_PER_REQUEST"
-    hash_key = "LockID"
+    hash_key     = "LockID"
 
     attribute {
-         name = "LockID"
-          type = "S"
+         name    = "LockID"
+          type   = "S"
     }
+}
