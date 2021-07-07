@@ -23,7 +23,7 @@ resource "aws_s3_bucket" "terraform_state"
     enabled = true
   }  
 
-  server_uside_encryption_configuration {
+  server_side_encryption_configuration {
     rule {
       apply_server_side_centryption_by_default {
         sse_algorithm = "AES256"
