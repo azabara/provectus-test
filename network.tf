@@ -1,34 +1,52 @@
-provider "aws" {
-  region  = "eu-central-1"
-}
+ resource "aws_vpc" "Main" {                # Creating VPC here
+   cidr_block       = var.main_vpc_cidr     # Defining the CIDR block use 10.0.0.0/24 for demo
+   instance_tenancy = "default"
+ }
+ 
+ resource "aws_internet_gateway" "IGW" {    # Creating Internet Gateway
+    vpc_id =  aws_vpc.Main.id               # vpc_id will be generated after we create VPC
+ }
 
-module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+resource "aws_subnet" "publicsubnets" {    # Creating Public Subnets
+   vpc_id =  aws_vpc.Main.id
+   cidr_block = "${var.public_subnets}"        # CIDR block of public subnets
+ }
 
-  name = "provectus"
-  cidr = "10.0.0.0/16"
+ resource "aws_subnet" "privatesubnets" {
+   vpc_id =  aws_vpc.Main.id
+   cidr_block = "${var.private_subnets}"          # CIDR block of private subnets
+ }
+ 
+ resource "aws_route_table" "PublicRT" {    # Creating RT for Public Subnet
+    vpc_id =  aws_vpc.Main.id
+         route {
+    cidr_block = "0.0.0.0/0"               # Traffic from Public Subnet reaches Internet via Internet Gateway
+    gateway_id = aws_internet_gateway.IGW.id
+     }
+ }
+ 
+ resource "aws_route_table" "PrivateRT" {    # Creating RT for Private Subnet
+   vpc_id = aws_vpc.Main.id
+   route {
+   cidr_block = "0.0.0.0/0"             # Traffic from Private Subnet reaches Internet via NAT Gateway
+   nat_gateway_id = aws_nat_gateway.NATgw.id
+   }
+ }
+ 
+ resource "aws_route_table_association" "PublicRTassociation" {
+    subnet_id = aws_subnet.publicsubnets.id
+    route_table_id = aws_route_table.PublicRT.id
+ }
 
-  azs             = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+ resource "aws_route_table_association" "PrivateRTassociation" {
+    subnet_id = aws_subnet.privatesubnets.id
+    route_table_id = aws_route_table.PrivateRT.id
+ }
+ resource "aws_eip" "nateIP" {
+   vpc   = true
+ }
 
-  enable_nat_gateway = true
-  single_nat_gateway = false
-  one_nat_gateway_per_az = false
-  enable_vpn_gateway = true
-  reuse_nat_ips       = true                    # <= Skip creation of EIPs for the NAT Gateways
-  external_nat_ip_ids = "${aws_eip.nat.*.id}"   # <= IPs specified here as input to the module
-
-
-  tags = {
-    Terraform = "true"
-    Environment = "dev"
-  }
-}
-
-  
-resource "aws_eip" "nat" {
-  count = 3
-
-  vpc = true
-}
+resource "aws_nat_gateway" "NATgw" {
+   allocation_id = aws_eip.nateIP.id
+   subnet_id = aws_subnet.publicsubnets.id
+ }
