@@ -1,12 +1,12 @@
-terraform {
-  backend "s3" {
-    bucket = "bucket-of-tulips"
-    key    = "global/s3/terrafrom.tfstate"
-    region = "eu-central-1"
-    dynamodb_table = "tf-be"
-    encrypt = "true"
-  }
-}
+#terraform {
+#  backend "s3" {
+#    bucket = "bucket-of-tulips"
+#    key    = "global/s3/terrafrom.tfstate"
+#    region = "eu-central-1"
+#    dynamodb_table = "tf-be"
+#    encrypt = "true"
+#  }
+#}
 
 resource "aws_s3_bucket" "terraform_state" {
     bucket = "bucket-of-tulips"
