@@ -14,7 +14,11 @@
 resource "aws_subnet" "publicsubnets" {    # Creating Public Subnets
    vpc_id =  aws_vpc.provectus.id
    cidr_block = "${var.public_subnets}"        # CIDR block of public subnets
- }
+  
+tags = {
+    Name = "provectus"
+   }
+}
 
  resource "aws_subnet" "privatesubnets" {
    vpc_id =  aws_vpc.provectus.id
