@@ -2,7 +2,7 @@
    cidr_block       = var.provectus_vpc_cidr     # Defining the CIDR block use 10.0.0.0/24 for demo
    instance_tenancy = "default"
   
-  tags = {
+   tags = {
     Name = "provectus"
    }
  }
@@ -15,7 +15,7 @@ resource "aws_subnet" "publicsubnets" {    # Creating Public Subnets
    vpc_id =  aws_vpc.provectus.id
    cidr_block = "${var.public_subnets}"        # CIDR block of public subnets
   
-tags = {
+   tags = {
     Name = "provectus"
    }
 }
